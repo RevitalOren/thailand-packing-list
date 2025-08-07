@@ -1,0 +1,16 @@
+node_modules
+dist
+data
+*.log
+.git
+.gitignore
+README.md
+.env
+.env.local
+.env.production
+.env.development
+coverage
+.nyc_output
+google-apps-script*.js
+src/services/googleSheets*.js
+src/config/googleSheets.js
