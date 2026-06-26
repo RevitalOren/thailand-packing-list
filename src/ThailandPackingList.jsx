@@ -409,6 +409,12 @@ const ThailandPackingList = () => {
             <Palmtree className="text-white w-9 h-9 drop-shadow" />
           </div>
           <p className="text-white/95 text-lg font-medium">רשימת חפצים לשלושה שבועות של הרפתקאות 🌴☀️🏝️</p>
+          <a
+            href="/plan.html"
+            className="inline-flex items-center gap-2 mt-4 bg-white text-pink-600 font-bold px-6 py-2.5 rounded-full shadow-lg hover:scale-105 transition-transform"
+          >
+            📅 לתוכנית הטיול המלאה
+          </a>
           <div className="flex items-center justify-center gap-2 mt-3 bg-white/20 rounded-full px-4 py-1.5 w-fit mx-auto backdrop-blur-sm">
             <Sun className="text-yellow-200 w-5 h-5" />
             <span className="text-sm text-white/95 font-medium">זכרו: מזג אוויר חם ולח, בדקו את כל הפריטים!</span>
