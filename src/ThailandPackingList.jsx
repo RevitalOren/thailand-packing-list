@@ -95,8 +95,13 @@ const ThailandPackingList = () => {
       'מתאם חשמל'
     ];
 
+    const kidTechItems = [
+      '🔌 מטען לטלפון/טאבלט',
+      '🔌 מתאם חשמל'
+    ];
+
     if (['אילון', 'יונתן', 'תמר'].includes(member)) {
-      return [...kidBaseItems, ...commonItems, ...flightItems, ...kidSpecialItems];
+      return [...kidBaseItems, ...commonItems, ...flightItems, ...kidSpecialItems, ...kidTechItems];
     } else {
       return [...adultBaseItems, ...commonItems, ...flightItems, ...adultTechItems];
     }
