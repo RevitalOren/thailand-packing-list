@@ -136,50 +136,45 @@ const ThailandPackingList = () => {
       console.log('Initializing Local API service...');
       
       const success = await localApiService.initialize();
-      
-      if (success) {
-        setIsConnected(true);
-        showSaveStatus('success', 'מחובר לשרת מקומי');
-        // Load existing data
-        try {
-          const localData = await localApiService.loadFamilyData();
-          if (localData) {
-            // Filter out metadata fields and use only family member data
-            const cleanedData = {};
-            Object.entries(localData).forEach(([key, value]) => {
-              // Skip metadata fields like lastUpdated, version
-              if (familyMembers.includes(key) && value && value.items) {
-                cleanedData[key] = {
-                  items: value.items,
-                  newItem: value.newItem || ''
+      setIsConnected(success);
+
+      // Always load saved data — loadFamilyData() falls back to localStorage
+      // even with no backend, so the list persists across reloads everywhere.
+      try {
+        const localData = await localApiService.loadFamilyData();
+        if (localData) {
+          // Filter out metadata fields and use only family member data
+          const cleanedData = {};
+          Object.entries(localData).forEach(([key, value]) => {
+            // Skip metadata fields like lastUpdated, version
+            if (familyMembers.includes(key) && value && value.items) {
+              cleanedData[key] = {
+                items: value.items,
+                newItem: value.newItem || ''
+              };
+            }
+          });
+
+          // Update family data with loaded data
+          setFamilyData(prevData => {
+            const mergedData = { ...prevData };
+            Object.entries(cleanedData).forEach(([memberName, memberData]) => {
+              if (mergedData[memberName]) {
+                mergedData[memberName] = {
+                  ...mergedData[memberName],
+                  items: memberData.items,
+                  newItem: memberData.newItem
                 };
               }
             });
-            
-            // Update family data with loaded data
-            setFamilyData(prevData => {
-              const mergedData = { ...prevData };
-              Object.entries(cleanedData).forEach(([memberName, memberData]) => {
-                if (mergedData[memberName]) {
-                  mergedData[memberName] = {
-                    ...mergedData[memberName],
-                    items: memberData.items,
-                    newItem: memberData.newItem
-                  };
-                }
-              });
-              return mergedData;
-            });
-            
-            showSaveStatus('success', 'נתונים נטענו מהשרת');
-            console.log('Data loaded and merged successfully from local API');
-          }
-        } catch (error) {
-          console.error('Error loading data:', error);
-          showSaveStatus('error', 'שגיאה בטעינת נתונים');
+            return mergedData;
+          });
+
+          showSaveStatus('success', success ? 'נתונים נטענו מהשרת' : 'נתונים נטענו מהמכשיר');
+          console.log('Data loaded and merged successfully');
         }
-      } else {
-        showSaveStatus('error', 'שגיאת חיבור לשרת מקומי');
+      } catch (error) {
+        console.error('Error loading data:', error);
       }
     };
 
@@ -227,23 +222,18 @@ const ThailandPackingList = () => {
 
   // Save data to local API with debouncing
   const saveDataToLocalApi = useCallback(async () => {
-    if (!isConnected) return;
-
     setIsSaving(true);
     try {
-      const success = await localApiService.saveFamilyData(familyData);
-      if (success) {
-        showSaveStatus('success', 'נשמר בהצלחה');
-      } else {
-        showSaveStatus('error', 'שגיאה בשמירה');
-      }
+      // saveFamilyData always writes to localStorage; backend is best-effort.
+      const backendOk = await localApiService.saveFamilyData(familyData);
+      showSaveStatus('success', backendOk ? 'נשמר בהצלחה' : 'נשמר במכשיר');
     } catch (error) {
       console.error('Error saving data:', error);
       showSaveStatus('error', 'שגיאה בשמירה');
     } finally {
       setIsSaving(false);
     }
-  }, [familyData, isConnected]);
+  }, [familyData]);
 
   // Debounced auto-save with current data
   const scheduleAutoSaveWithData = useCallback((dataToSave) => {
@@ -252,16 +242,11 @@ const ThailandPackingList = () => {
     }
 
     const timeout = setTimeout(async () => {
-      if (!isConnected) return;
-
       setIsSaving(true);
       try {
-        const success = await localApiService.saveFamilyData(dataToSave);
-        if (success) {
-          showSaveStatus('success', 'נשמר בהצלחה');
-        } else {
-          showSaveStatus('error', 'שגיאה בשמירה');
-        }
+        // Always persist — localStorage works even with no backend.
+        const backendOk = await localApiService.saveFamilyData(dataToSave);
+        showSaveStatus('success', backendOk ? 'נשמר בהצלחה' : 'נשמר במכשיר');
       } catch (error) {
         console.error('Error saving data:', error);
         showSaveStatus('error', 'שגיאה בשמירה');
@@ -271,7 +256,7 @@ const ThailandPackingList = () => {
     }, 2000); // 2 second delay for auto-save
 
     setAutoSaveTimeout(timeout);
-  }, [isConnected, autoSaveTimeout]);
+  }, [autoSaveTimeout]);
 
   // Debounced auto-save (legacy - uses current familyData state)
   const scheduleAutoSave = useCallback(() => {
@@ -414,40 +399,40 @@ const ThailandPackingList = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-cyan-50 to-teal-50 p-4">
+    <div className="min-h-screen bg-gradient-to-br from-orange-100 via-pink-100 to-purple-200 p-4">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
-        <div className="text-center mb-8 bg-white rounded-2xl shadow-lg p-6">
+        <div className="text-center mb-8 bg-gradient-to-r from-fuchsia-500 via-orange-400 to-amber-400 rounded-3xl shadow-2xl p-8 text-white">
           <div className="flex items-center justify-center gap-3 mb-4">
-            <Plane className="text-blue-500 w-8 h-8" />
-            <h1 className="text-3xl font-bold text-gray-800">טיול תאילנד 🇹🇭</h1>
-            <Palmtree className="text-green-500 w-8 h-8" />
+            <Plane className="text-white w-9 h-9 drop-shadow" />
+            <h1 className="text-4xl font-extrabold drop-shadow-lg">טיול תאילנד 🇹🇭</h1>
+            <Palmtree className="text-white w-9 h-9 drop-shadow" />
           </div>
-          <p className="text-gray-600 text-lg">רשימת חפצים לשלושה שבועות של הרפתקאות</p>
-          <div className="flex items-center justify-center gap-2 mt-3">
-            <Sun className="text-yellow-500 w-5 h-5" />
-            <span className="text-sm text-gray-500">זכרו: מזג אוויר חם ולח, בדקו את כל הפריטים!</span>
+          <p className="text-white/95 text-lg font-medium">רשימת חפצים לשלושה שבועות של הרפתקאות 🌴☀️🏝️</p>
+          <div className="flex items-center justify-center gap-2 mt-3 bg-white/20 rounded-full px-4 py-1.5 w-fit mx-auto backdrop-blur-sm">
+            <Sun className="text-yellow-200 w-5 h-5" />
+            <span className="text-sm text-white/95 font-medium">זכרו: מזג אוויר חם ולח, בדקו את כל הפריטים!</span>
           </div>
           
           {/* Cloud sync status */}
-          <div className="flex items-center justify-center gap-2 mt-4 p-2 rounded-lg bg-gray-50">
+          <div className="flex items-center justify-center gap-2 mt-4 p-2 rounded-full bg-white/20 backdrop-blur-sm w-fit mx-auto">
             {isConnected ? (
               <>
-                <Cloud className="w-4 h-4 text-green-500" />
-                <span className="text-xs text-green-600">מחובר לשרת</span>
-                {isSaving && <Loader className="w-4 h-4 animate-spin text-blue-500" />}
-                <button 
+                <Cloud className="w-4 h-4 text-green-200" />
+                <span className="text-xs text-white font-medium">מחובר לשרת</span>
+                {isSaving && <Loader className="w-4 h-4 animate-spin text-white" />}
+                <button
                   onClick={handleManualSave}
                   disabled={isSaving}
-                  className="ml-2 px-2 py-1 text-xs bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50"
+                  className="ml-2 px-3 py-1 text-xs bg-white/90 text-pink-600 font-bold rounded-full hover:bg-white disabled:opacity-50"
                 >
                   שמור עכשיו
                 </button>
               </>
             ) : (
               <>
-                <CloudOff className="w-4 h-4 text-gray-400" />
-                <span className="text-xs text-gray-500">לא מחובר לשרת</span>
+                <CloudOff className="w-4 h-4 text-white/70" />
+                <span className="text-xs text-white/80 font-medium">💾 נשמר במכשיר</span>
               </>
             )}
           </div>
@@ -473,16 +458,16 @@ const ThailandPackingList = () => {
               <button
                 key={member}
                 onClick={() => setActiveTab(member)}
-                className={`px-6 py-3 rounded-xl font-medium transition-all duration-200 flex items-center gap-2 ${
+                className={`px-6 py-3 rounded-2xl font-bold transition-all duration-200 flex items-center gap-2 ${
                   activeTab === member
-                    ? 'bg-blue-500 text-white shadow-lg scale-105'
-                    : 'bg-white text-gray-700 hover:bg-blue-50 shadow-md hover:shadow-lg'
+                    ? 'bg-gradient-to-r from-pink-500 to-orange-400 text-white shadow-xl scale-110 ring-2 ring-white'
+                    : 'bg-white text-gray-700 hover:bg-pink-50 hover:scale-105 shadow-md hover:shadow-lg'
                 }`}
               >
                 {isKid ? '🧒' : <User className="w-4 h-4" />}
                 <span>{member}</span>
-                <span className={`text-xs px-2 py-1 rounded-full ${
-                  activeTab === member ? 'bg-blue-400' : 'bg-gray-200'
+                <span className={`text-xs px-2 py-1 rounded-full font-bold ${
+                  activeTab === member ? 'bg-white/30 text-white' : 'bg-gradient-to-r from-pink-100 to-orange-100 text-pink-600'
                 }`}>
                   {progress}%
                 </span>
@@ -492,9 +477,9 @@ const ThailandPackingList = () => {
         </div>
 
         {/* Active Member's List */}
-        <div className="bg-white rounded-2xl shadow-xl p-6">
+        <div className="bg-white/90 backdrop-blur rounded-3xl shadow-2xl p-6 border-4 border-white">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-3">
+            <h2 className="text-2xl font-extrabold bg-gradient-to-r from-pink-600 to-orange-500 bg-clip-text text-transparent flex items-center gap-3">
               {['אילון', 'יונתן', 'תמר'].includes(activeTab) ? '🧒' : <User className="text-blue-500" />}
               רשימת {activeTab}
               {['אילון', 'יונתן', 'תמר'].includes(activeTab) && 
@@ -512,9 +497,9 @@ const ThailandPackingList = () => {
               <span>התקדמות</span>
               <span>{getProgress(activeTab)}% הושלם</span>
             </div>
-            <div className="w-full bg-gray-200 rounded-full h-3">
-              <div 
-                className="bg-gradient-to-r from-green-400 to-blue-500 h-3 rounded-full transition-all duration-500"
+            <div className="w-full bg-gray-200 rounded-full h-4">
+              <div
+                className="bg-gradient-to-r from-green-400 via-yellow-400 to-orange-500 h-4 rounded-full transition-all duration-500 shadow-md"
                 style={{ width: `${getProgress(activeTab)}%` }}
               ></div>
             </div>
@@ -533,7 +518,7 @@ const ThailandPackingList = () => {
             />
             <button
               onClick={() => addItem(activeTab)}
-              className="px-6 py-3 bg-green-500 text-white rounded-xl hover:bg-green-600 transition-colors duration-200 flex items-center gap-2 shadow-md hover:shadow-lg"
+              className="px-6 py-3 bg-gradient-to-r from-teal-500 to-green-500 text-white rounded-2xl hover:from-teal-600 hover:to-green-600 transition-all duration-200 flex items-center gap-2 shadow-md hover:shadow-lg font-bold"
             >
               <Plus className="w-4 h-4" />
               הוסף
@@ -545,10 +530,10 @@ const ThailandPackingList = () => {
             {familyData[activeTab].items.map(item => (
               <div
                 key={item.id}
-                className={`p-4 rounded-xl border-2 transition-all duration-200 ${
+                className={`p-4 rounded-2xl border-2 transition-all duration-200 ${
                   item.checked
-                    ? 'bg-green-50 border-green-200 text-green-800'
-                    : 'bg-gray-50 border-gray-200 text-gray-700 hover:border-blue-300'
+                    ? 'bg-gradient-to-r from-green-100 to-emerald-50 border-green-300 text-green-800'
+                    : 'bg-white border-pink-100 text-gray-700 hover:border-orange-300 hover:shadow-md'
                 }`}
               >
                 {editingItem?.itemId === item.id ? (
