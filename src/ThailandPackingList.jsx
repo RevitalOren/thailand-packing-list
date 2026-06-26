@@ -130,6 +130,21 @@ const ThailandPackingList = () => {
   const [saveStatus, setSaveStatus] = useState(''); // 'success', 'error', or ''
   const [autoSaveTimeout, setAutoSaveTimeout] = useState(null);
 
+  // Countdown to leaving home — 3.5h before the 13:40 flight on 6 July 2026 = 10:10 (Israel time)
+  const LEAVE_HOME = new Date('2026-07-06T10:10:00+03:00').getTime();
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const timer = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+  const msLeft = LEAVE_HOME - now;
+  const cd = {
+    days: Math.floor(msLeft / 86400000),
+    hours: Math.floor((msLeft % 86400000) / 3600000),
+    minutes: Math.floor((msLeft % 3600000) / 60000),
+    seconds: Math.floor((msLeft % 60000) / 1000)
+  };
+
   // Initialize local API connection
   useEffect(() => {
     const initializeLocalApi = async () => {
@@ -415,6 +430,28 @@ const ThailandPackingList = () => {
           >
             📅 לתוכנית הטיול המלאה
           </a>
+
+          {/* Countdown to leaving home */}
+          <div className="mt-5 bg-white/20 backdrop-blur-sm rounded-2xl px-4 py-3 w-fit mx-auto">
+            <div className="text-xs text-white/90 font-medium mb-2">⏳ יציאה מהבית (3.5 שעות לפני הטיסה) · 6.7 בשעה 10:10</div>
+            {msLeft > 0 ? (
+              <div className="flex items-center justify-center gap-2 sm:gap-3" dir="ltr">
+                {[
+                  { v: cd.days, l: 'ימים' },
+                  { v: cd.hours, l: 'שעות' },
+                  { v: cd.minutes, l: 'דקות' },
+                  { v: cd.seconds, l: 'שניות' }
+                ].map((u, i) => (
+                  <div key={i} className="bg-white/90 rounded-xl px-2.5 py-1.5 min-w-[52px] shadow">
+                    <div className="text-2xl font-extrabold text-pink-600 leading-none tabular-nums">{String(u.v).padStart(2, '0')}</div>
+                    <div className="text-[10px] text-gray-500 font-medium mt-0.5">{u.l}</div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-lg font-extrabold text-white">🎉 יוצאים לדרך! בטיסה נעימה ✈️</div>
+            )}
+          </div>
           <div className="flex items-center justify-center gap-2 mt-3 bg-white/20 rounded-full px-4 py-1.5 w-fit mx-auto backdrop-blur-sm">
             <Sun className="text-yellow-200 w-5 h-5" />
             <span className="text-sm text-white/95 font-medium">זכרו: מזג אוויר חם ולח, בדקו את כל הפריטים!</span>
