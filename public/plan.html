@@ -566,6 +566,12 @@
     <div class="eyebrow">המסע המשפחתי · קיץ 2026</div>
     <h1>תאילנד <span class="year">2026</span></h1>
     <div class="hero-dates">6 ביולי – 27 ביולי · 22 ימים · 20 לילות · 5 נוסעים</div>
+
+    <!-- COUNTDOWN -->
+    <div id="countdown" style="margin:22px auto 0;max-width:520px">
+      <div style="font-size:13px;font-weight:600;color:var(--ink-soft);margin-bottom:10px">⏳ יציאה מהבית · 6 ביולי 10:10 <span style="opacity:.7">(3.5 שעות לפני הטיסה 13:40)</span></div>
+      <div id="cd-grid" dir="ltr" style="display:flex;justify-content:center;gap:10px"></div>
+    </div>
     <div class="stats">
       <div class="stat">🏝️ <b>5</b> יעדים</div>
       <div class="stat">🏨 <b>5</b> מלונות</div>
@@ -1226,6 +1232,29 @@
         if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); jumpTo(target); }
       });
     });
+  })();
+</script>
+<script>
+  (function(){
+    var TARGET = new Date('2026-07-06T10:10:00+03:00').getTime();
+    var grid = document.getElementById('cd-grid');
+    var labels = [['days','ימים'],['hours','שעות'],['minutes','דקות'],['seconds','שניות']];
+    function box(v,l){
+      return '<div style="background:var(--card);border:1px solid var(--line);border-radius:14px;'
+        + 'box-shadow:var(--shadow);padding:8px 4px;min-width:62px">'
+        + '<div style="font-family:\'Frank Ruhl Libre\',serif;font-weight:900;font-size:28px;line-height:1;color:var(--phuket)">'
+        + String(v).padStart(2,'0') + '</div>'
+        + '<div style="font-size:11px;color:var(--ink-soft);font-weight:600;margin-top:4px">' + l + '</div></div>';
+    }
+    function tick(){
+      var ms = TARGET - Date.now();
+      if(ms <= 0){ grid.innerHTML = '<div style="font-family:\'Frank Ruhl Libre\',serif;font-weight:900;font-size:24px;color:var(--khaolak)">🎉 יוצאים לדרך! בטיסה נעימה ✈️</div>'; clearInterval(iv); return; }
+      var d = Math.floor(ms/86400000), h = Math.floor(ms%86400000/3600000), m = Math.floor(ms%3600000/60000), s = Math.floor(ms%60000/1000);
+      var vals = {days:d,hours:h,minutes:m,seconds:s};
+      grid.innerHTML = labels.map(function(x){ return box(vals[x[0]], x[1]); }).join('');
+    }
+    tick();
+    var iv = setInterval(tick, 1000);
   })();
 </script>
 </body>
