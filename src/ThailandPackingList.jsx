@@ -492,6 +492,43 @@ const ThailandPackingList = () => {
           )}
         </div>
 
+        {/* Family Overview */}
+        {(() => {
+          const totals = familyMembers.reduce((acc, m) => {
+            const items = familyData[m].items;
+            acc.total += items.length;
+            acc.checked += items.filter(i => i.checked).length;
+            return acc;
+          }, { total: 0, checked: 0 });
+          const overall = totals.total ? Math.round((totals.checked / totals.total) * 100) : 0;
+          return (
+            <div className="bg-white/90 backdrop-blur rounded-3xl shadow-xl p-5 mb-6 border-4 border-white">
+              <div className="flex items-center justify-between mb-3">
+                <h2 className="text-xl font-extrabold flex items-center gap-2"><span>📊</span><span className="bg-gradient-to-r from-pink-600 to-orange-500 bg-clip-text text-transparent">סקירת המשפחה</span></h2>
+                <span className="text-sm font-bold text-gray-600">{totals.checked}/{totals.total} פריטים · {overall}%</span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-4 mb-4">
+                <div className="bg-gradient-to-r from-green-400 via-yellow-400 to-orange-500 h-4 rounded-full transition-all duration-500 shadow" style={{ width: `${overall}%` }}></div>
+              </div>
+              <div className="grid gap-2">
+                {familyMembers.map(m => {
+                  const p = getProgress(m);
+                  const isKid = ['אילון', 'יונתן', 'תמר'].includes(m);
+                  return (
+                    <button key={m} onClick={() => setActiveTab(m)} className="flex items-center gap-3 text-right hover:bg-pink-50 rounded-xl p-1.5 transition-colors">
+                      <span className="w-20 shrink-0 font-bold text-gray-700 flex items-center gap-1">{isKid ? '🧒' : '🧳'} {m}</span>
+                      <div className="flex-1 bg-gray-100 rounded-full h-2.5">
+                        <div className={`h-2.5 rounded-full transition-all duration-500 ${p === 100 ? 'bg-green-500' : 'bg-gradient-to-r from-pink-400 to-orange-400'}`} style={{ width: `${p}%` }}></div>
+                      </div>
+                      <span className="w-12 shrink-0 text-xs font-bold text-gray-500 tabular-nums">{p === 100 ? '✅' : `${p}%`}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })()}
+
         {/* Family Tabs */}
         <div className="flex flex-wrap justify-center gap-2 mb-6">
           {familyMembers.map(member => {
@@ -522,10 +559,10 @@ const ThailandPackingList = () => {
         {/* Active Member's List */}
         <div className="bg-white/90 backdrop-blur rounded-3xl shadow-2xl p-6 border-4 border-white">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-extrabold bg-gradient-to-r from-pink-600 to-orange-500 bg-clip-text text-transparent flex items-center gap-3">
-              {['אילון', 'יונתן', 'תמר'].includes(activeTab) ? '🧒' : <User className="text-blue-500" />}
-              רשימת {activeTab}
-              {['אילון', 'יונתן', 'תמר'].includes(activeTab) && 
+            <h2 className="text-2xl font-extrabold flex items-center gap-3">
+              {['אילון', 'יונתן', 'תמר'].includes(activeTab) ? <span>🧒</span> : <User className="text-pink-500" />}
+              <span className="bg-gradient-to-r from-pink-600 to-orange-500 bg-clip-text text-transparent">רשימת {activeTab}</span>
+              {['אילון', 'יונתן', 'תמר'].includes(activeTab) &&
                 <span className="text-lg">🎮✈️</span>
               }
             </h2>
