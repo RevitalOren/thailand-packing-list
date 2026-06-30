@@ -1,7 +1,9 @@
 // Service worker — offline support for the Thailand packing app.
 // Bump CACHE to force an update when this file changes.
-const CACHE = 'thailand-2026-v1';
-const SHELL = ['/', '/plan.html', '/manifest.webmanifest', '/icon-192.png', '/icon-512.png'];
+const CACHE = 'thailand-2026-v2';
+// Note: '/' and '/plan.html' are NOT precached — they're fetched network-first on
+// navigation so content edits show immediately, and cached at runtime for offline.
+const SHELL = ['/manifest.webmanifest', '/icon-192.png', '/icon-512.png'];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting()));
