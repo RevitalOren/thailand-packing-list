@@ -92,7 +92,8 @@ const ThailandPackingList = () => {
 
     const adultTechItems = [
       'מטען נייד',
-      'מתאם חשמל'
+      'מתאם חשמל',
+      '⌚ מטען לשעון חכם'
     ];
 
     const kidTechItems = [
