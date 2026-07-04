@@ -58,3 +58,57 @@ code {
   50% { transform: rotate(8deg); }
 }
 .wiggle { animation: wiggle 2.6s ease-in-out infinite; }
+
+/* ---- Emoji reaction overlay (happy on check, angry on uncheck/delete) ---- */
+.reaction-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  animation: reaction-flash 0.8s ease both;
+}
+.reaction-happy { background: radial-gradient(circle, rgba(74, 222, 128, 0.35), rgba(34, 197, 94, 0.15)); }
+.reaction-angry { background: radial-gradient(circle, rgba(248, 113, 113, 0.4), rgba(220, 38, 38, 0.18)); }
+
+@keyframes reaction-flash {
+  0% { opacity: 0; }
+  15% { opacity: 1; }
+  70% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+.reaction-emoji {
+  font-size: clamp(90px, 30vw, 180px);
+  animation: reaction-bounce 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.25));
+}
+@keyframes reaction-bounce {
+  0% { transform: scale(0.2) rotate(-15deg); opacity: 0; }
+  40% { transform: scale(1.15) rotate(6deg); opacity: 1; }
+  60% { transform: scale(0.95) rotate(-2deg); }
+  80% { transform: scale(1.03) rotate(0deg); }
+  100% { transform: scale(1); opacity: 0.9; }
+}
+
+/* Angry shakes the whole screen for a moment */
+@keyframes screen-shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-8px) rotate(-0.4deg); }
+  40% { transform: translateX(8px) rotate(0.4deg); }
+  60% { transform: translateX(-5px); }
+  80% { transform: translateX(5px); }
+}
+body:has(.reaction-angry) #root {
+  animation: screen-shake 0.5s ease;
+}
+/* Happy gives the screen a joyful little pulse */
+body:has(.reaction-happy) #root {
+  animation: screen-pulse 0.5s ease;
+}
+@keyframes screen-pulse {
+  0%, 100% { transform: scale(1); }
+  40% { transform: scale(1.012); }
+}

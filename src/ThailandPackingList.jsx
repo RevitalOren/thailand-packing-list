@@ -138,6 +138,13 @@ const ThailandPackingList = () => {
     const timer = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(timer);
   }, []);
+  // Emoji reaction overlay — happy when checking, angry when unchecking/deleting
+  const [reaction, setReaction] = useState(null); // { type: 'happy' | 'angry', id }
+  const showReaction = (type) => {
+    setReaction({ type, id: Date.now() });
+    setTimeout(() => setReaction((r) => (r && Date.now() - r.id >= 750 ? null : r)), 800);
+  };
+
   const msLeft = LEAVE_HOME - now;
   const cd = {
     days: Math.floor(msLeft / 86400000),
@@ -300,6 +307,8 @@ const ThailandPackingList = () => {
 
   // Modified toggle function with auto-save
   const toggleItem = (member, itemId) => {
+    const wasChecked = familyData[member].items.find(i => i.id === itemId)?.checked;
+    showReaction(wasChecked ? 'angry' : 'happy');
     setFamilyData(prev => {
       const newData = {
         ...prev,
@@ -322,6 +331,7 @@ const ThailandPackingList = () => {
 
   // Modified delete function with auto-save
   const deleteItem = (member, itemId) => {
+    showReaction('angry');
     setFamilyData(prev => {
       const newData = {
         ...prev,
@@ -416,6 +426,16 @@ const ThailandPackingList = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-100 via-pink-100 to-purple-200 p-4">
+      {/* Emoji reaction overlay */}
+      {reaction && (
+        <div
+          key={reaction.id}
+          className={`reaction-overlay ${reaction.type === 'happy' ? 'reaction-happy' : 'reaction-angry'}`}
+        >
+          <span className="reaction-emoji">{reaction.type === 'happy' ? '😄' : '😠'}</span>
+        </div>
+      )}
+
       {/* Floating tropical background decorations */}
       <span className="floaty text-6xl" style={{ top: '12%', left: '4%' }}>🌴</span>
       <span className="floaty text-5xl" style={{ top: '35%', right: '3%', animationDelay: '1.2s' }}>🏝️</span>
