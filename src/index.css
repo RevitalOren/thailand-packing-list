@@ -16,3 +16,45 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+/* ---- Design polish ---- */
+
+/* Items pop in one after another */
+@keyframes item-in {
+  from { opacity: 0; transform: translateY(8px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.item-row {
+  animation: item-in 0.35s ease both;
+}
+
+/* Little bounce when an item gets checked */
+@keyframes check-pop {
+  0% { transform: scale(1); }
+  45% { transform: scale(1.25) rotate(-6deg); }
+  100% { transform: scale(1); }
+}
+.check-pop {
+  animation: check-pop 0.35s ease;
+}
+
+/* Floating tropical decorations in the page background */
+@keyframes float-slow {
+  0%, 100% { transform: translateY(0) rotate(-4deg); }
+  50% { transform: translateY(-16px) rotate(5deg); }
+}
+.floaty {
+  position: fixed;
+  z-index: 0;
+  opacity: 0.18;
+  pointer-events: none;
+  user-select: none;
+  animation: float-slow 7s ease-in-out infinite;
+}
+
+/* Gentle wiggle for the header plane */
+@keyframes wiggle {
+  0%, 100% { transform: rotate(-8deg); }
+  50% { transform: rotate(8deg); }
+}
+.wiggle { animation: wiggle 2.6s ease-in-out infinite; }

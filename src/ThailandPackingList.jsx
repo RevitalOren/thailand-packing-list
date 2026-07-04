@@ -416,11 +416,17 @@ const ThailandPackingList = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-100 via-pink-100 to-purple-200 p-4">
-      <div className="max-w-4xl mx-auto">
+      {/* Floating tropical background decorations */}
+      <span className="floaty text-6xl" style={{ top: '12%', left: '4%' }}>🌴</span>
+      <span className="floaty text-5xl" style={{ top: '35%', right: '3%', animationDelay: '1.2s' }}>🏝️</span>
+      <span className="floaty text-5xl" style={{ top: '62%', left: '5%', animationDelay: '2.4s' }}>🐘</span>
+      <span className="floaty text-4xl" style={{ top: '80%', right: '6%', animationDelay: '0.6s' }}>🍍</span>
+      <span className="floaty text-4xl" style={{ top: '50%', left: '45%', animationDelay: '3s' }}>🌺</span>
+      <div className="max-w-4xl mx-auto relative z-10">
         {/* Header */}
         <div className="text-center mb-8 bg-gradient-to-r from-fuchsia-500 via-orange-400 to-amber-400 rounded-3xl shadow-2xl p-8 text-white">
           <div className="flex items-center justify-center gap-3 mb-4">
-            <Plane className="text-white w-9 h-9 drop-shadow" />
+            <Plane className="text-white w-9 h-9 drop-shadow wiggle" />
             <h1 className="text-4xl font-extrabold drop-shadow-lg">טיול תאילנד 🇹🇭</h1>
             <Palmtree className="text-white w-9 h-9 drop-shadow" />
           </div>
@@ -576,13 +582,18 @@ const ThailandPackingList = () => {
           <div className="mb-6">
             <div className="flex justify-between text-sm text-gray-600 mb-2">
               <span>התקדמות</span>
-              <span>{getProgress(activeTab)}% הושלם</span>
+              <span className="font-bold">{getProgress(activeTab) === 100 ? '🎉 הכל ארוז!' : `${getProgress(activeTab)}% הושלם`}</span>
             </div>
-            <div className="w-full bg-gray-200 rounded-full h-4">
+            <div className="relative w-full bg-gray-200 rounded-full h-5" dir="ltr">
               <div
-                className="bg-gradient-to-r from-green-400 via-yellow-400 to-orange-500 h-4 rounded-full transition-all duration-500 shadow-md"
+                className="bg-gradient-to-r from-green-400 via-yellow-400 to-orange-500 h-5 rounded-full transition-all duration-700 shadow-md"
                 style={{ width: `${getProgress(activeTab)}%` }}
               ></div>
+              <span
+                className="absolute top-1/2 -translate-y-1/2 text-xl transition-all duration-700 drop-shadow"
+                style={{ left: `calc(${getProgress(activeTab)}% - 14px)` }}
+              >✈️</span>
+              <span className="absolute top-1/2 -translate-y-1/2 right-1 text-sm">🇹🇭</span>
             </div>
           </div>
 
@@ -608,14 +619,15 @@ const ThailandPackingList = () => {
 
           {/* Items List */}
           <div className="grid gap-2">
-            {familyData[activeTab].items.map(item => (
+            {familyData[activeTab].items.map((item, idx) => (
               <div
                 key={item.id}
-                className={`p-4 rounded-2xl border-2 transition-all duration-200 ${
+                className={`item-row p-4 rounded-2xl border-2 transition-all duration-200 ${
                   item.checked
                     ? 'bg-gradient-to-r from-green-100 to-emerald-50 border-green-300 text-green-800'
-                    : 'bg-white border-pink-100 text-gray-700 hover:border-orange-300 hover:shadow-md'
+                    : 'bg-white border-pink-100 text-gray-700 hover:border-orange-300 hover:shadow-md hover:-translate-y-0.5'
                 }`}
+                style={{ animationDelay: `${Math.min(idx * 30, 600)}ms` }}
               >
                 {editingItem?.itemId === item.id ? (
                   // Edit Mode
@@ -646,12 +658,12 @@ const ThailandPackingList = () => {
                   // Normal Mode
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3 flex-1">
-                      <div 
+                      <div
                         onClick={() => toggleItem(activeTab, item.id)}
                         className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-200 cursor-pointer ${
                           item.checked
-                            ? 'bg-green-500 border-green-500'
-                            : 'border-gray-300 hover:border-blue-500'
+                            ? 'bg-green-500 border-green-500 check-pop'
+                            : 'border-gray-300 hover:border-pink-500 hover:scale-110'
                         }`}
                       >
                         {item.checked && <Check className="w-4 h-4 text-white" />}
